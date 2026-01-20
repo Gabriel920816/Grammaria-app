@@ -31,15 +31,7 @@
       font-family: 'Inter', sans-serif;
       transition: background-color 0.3s ease;
       overflow-x: hidden;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    ::-webkit-scrollbar {
-      display: none !important;
-    }
-    * {
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
+      margin: 0;
     }
     .dark body {
       background-color: #020617;
@@ -47,19 +39,30 @@
     .light body {
       background-color: #f8fafc;
     }
-  </style>
-  <script type="importmap">
-  {
-    "imports": {
-      "react/": "https://esm.sh/react@^19.2.3/",
-      "react": "https://esm.sh/react@^19.2.3",
-      "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-      "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
+    /* 隐藏滚动条但保留功能 */
+    ::-webkit-scrollbar {
+      display: none;
     }
+    * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
-  </script>
+}
+</script>
 </head>
 <body>
   <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>
