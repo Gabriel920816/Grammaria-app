@@ -1,25 +1,37 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { GrammarAnalysis } from "../types";
+import { GrammarAnalysis, WritingTone } from "../types";
 
-const API_KEY = process.env.API_KEY || '';
+// Removed local API_KEY constant to comply with guidelines and use process.env.API_KEY directly in the client constructor.
 
 export const analyzeGrammarStream = async (
   text: string, 
+  tone: WritingTone,
   onStream: (type: 'corrected' | 'diff' | 'json', content: string) => void,
   onComplete: (analysis: GrammarAnalysis) => void
 ) => {
   if (!text.trim()) return;
 
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Always use { apiKey: process.env.API_KEY } as per guidelines
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
+  const toneInstructions = {
+    Standard: "Focus on clear, grammatically correct English suitable for any general situation.",
+    Professional: "Enhance for a formal workplace setting. Use professional vocabulary and ensure a polite, direct tone.",
+    Casual: "Keep it natural and relaxed, suitable for friends or social media. Avoid being overly stiff.",
+    Academic: "Optimise for scholarly writing. Use precise language, objective tone, and formal structures."
+  };
+
   const responseStream = await ai.models.generateContentStream({
     model: 'gemini-3-flash-preview',
-    contents: `Analyze this English text: "${text}"
+    contents: `Analyze this English text with a ${tone} tone: "${text}"
     
+    TONE SPECIFICS: ${toneInstructions[tone]}
+
     CRITICAL INSTRUCTIONS:
-    1. Maintain perfect spacing. If you replace a word, ensure there is a space before and after the correction segments unless it is at the end of a sentence.
+    1. Maintain perfect spacing. If you replace a word, ensure there is a space before and after the correction segments.
     2. Output strictly in the defined format.
+    3. Categorize each explanation into one of: 'Tense', 'Vocabulary', 'Punctuation', 'Article', 'Other'.
     
     OUTPUT FORMAT:
     1. Start with [[CORRECTED_START]] then the full corrected sentence.
@@ -28,11 +40,11 @@ export const analyzeGrammarStream = async (
     
     JSON Schema:
     {
-      "explanations": [{"original": string, "corrected": string, "reason": string}],
+      "explanations": [{"original": string, "corrected": string, "reason": string, "category": string}],
       "overallFeedback": string
     }`,
     config: {
-      systemInstruction: "You are an expert English teacher. You provide instant, word-by-word streaming feedback. You are extremely careful with punctuation and spacing."
+      systemInstruction: "You are an expert English teacher specializing in ESL support. You provide instant feedback tailored to specific writing tones. You are extremely careful with punctuation and spacing."
     }
   });
 
@@ -43,10 +55,10 @@ export const analyzeGrammarStream = async (
   };
 
   for await (const chunk of responseStream) {
-    const chunkText = chunk.text;
+    // Correctly access .text property from chunk
+    const chunkText = chunk.text || "";
     fullResponse += chunkText;
 
-    // Continuous extraction to prevent truncation
     const correctedMatch = fullResponse.split("[[CORRECTED_START]]")[1]?.split("[[DIFF_START]]")[0];
     if (correctedMatch !== undefined) {
       onStream('corrected', stripTags(correctedMatch));
@@ -63,16 +75,17 @@ export const analyzeGrammarStream = async (
     }
   }
 
-  // Final Cleanup & Parse
   try {
     const parts = fullResponse.split(/\[\[.*?\]\]/);
-    // index 1: corrected, index 2: diff, index 3: json
     const correctedText = parts[1]?.trim() || "";
+    // Extract the raw diff string from the parts
+    const rawDiff = parts[2]?.trim() || "";
     const jsonStr = parts[3]?.trim() || "{}";
     const jsonData = JSON.parse(jsonStr);
 
     onComplete({
       correctedText,
+      rawDiff,
       diff: [], 
       explanations: jsonData.explanations || [],
       overallFeedback: jsonData.overallFeedback || "Great improvement!"

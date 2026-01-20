@@ -8,6 +8,7 @@ interface ResultPanelProps {
   isLoading: boolean;
   isCopied: boolean;
   onCopy: () => void;
+  highlightText?: string;
 }
 
 const ResultPanel: React.FC<ResultPanelProps> = ({
@@ -16,6 +17,7 @@ const ResultPanel: React.FC<ResultPanelProps> = ({
   isLoading,
   isCopied,
   onCopy,
+  highlightText,
 }) => {
   const correctedScrollRef = useRef<HTMLDivElement>(null);
   const diffScrollRef = useRef<HTMLDivElement>(null);
@@ -41,7 +43,6 @@ const ResultPanel: React.FC<ResultPanelProps> = ({
       
       <div className="bg-white dark:bg-slate-900/60 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 transition-all flex flex-col flex-grow min-h-0 overflow-hidden">
         
-        {/* Top Half: Corrected Phrase - Force 50% and hide overflow outside of scroll area */}
         <div className="h-1/2 flex flex-col min-h-0 border-b border-slate-100 dark:border-slate-800 overflow-hidden">
           <div className="px-8 pt-6 pb-2 shrink-0 flex items-center justify-between">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Corrected Phrase</span>
@@ -72,7 +73,6 @@ const ResultPanel: React.FC<ResultPanelProps> = ({
           </div>
         </div>
 
-        {/* Bottom Half: Annotated Changes - Force 50% */}
         <div className="h-1/2 flex flex-col min-h-0 overflow-hidden">
           <div className="px-8 pt-6 pb-2 shrink-0">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Annotated Changes</span>
@@ -82,7 +82,7 @@ const ResultPanel: React.FC<ResultPanelProps> = ({
             className="flex-grow px-8 pb-6 overflow-y-auto no-scrollbar scroll-smooth whitespace-pre-wrap break-words min-h-0"
           >
             {diffText ? (
-              <DiffViewer rawDiff={diffText} />
+              <DiffViewer rawDiff={diffText} highlightText={highlightText} />
             ) : (
               <span className="text-slate-200 dark:text-slate-800/30 italic text-sm">Visual diff will appear here</span>
             )}

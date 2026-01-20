@@ -3,9 +3,10 @@ import React from 'react';
 
 interface DiffViewerProps {
   rawDiff: string;
+  highlightText?: string;
 }
 
-const DiffViewer: React.FC<DiffViewerProps> = ({ rawDiff }) => {
+const DiffViewer: React.FC<DiffViewerProps> = ({ rawDiff, highlightText }) => {
   const parseDiff = (text: string) => {
     const parts: { text: string; type: 'unchanged' | 'removed' | 'added' }[] = [];
     let remaining = text;
@@ -55,16 +56,21 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ rawDiff }) => {
   return (
     <div className="leading-relaxed text-xl whitespace-pre-wrap break-words">
       {segments.map((segment, index) => {
+        const isHighlighted = highlightText && segment.text.trim().toLowerCase() === highlightText.trim().toLowerCase();
+        
         if (segment.type === 'removed') {
           return (
-            <span key={index} className="text-rose-500 line-through decoration-rose-400 dark:text-rose-400/60 bg-rose-50/50 dark:bg-rose-900/10 px-0.5 rounded transition-colors">
+            <span key={index} className="text-rose-500 line-through decoration-rose-400 dark:text-rose-400/60 bg-rose-50/50 dark:bg-rose-900/10 px-0.5 rounded transition-all">
               {segment.text}
             </span>
           );
         }
         if (segment.type === 'added') {
           return (
-            <span key={index} className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 px-1 rounded transition-colors">
+            <span 
+              key={index} 
+              className={`text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 px-1 rounded transition-all duration-300 ${isHighlighted ? 'ring-2 ring-indigo-500 scale-110 inline-block bg-indigo-50 dark:bg-indigo-500/20' : ''}`}
+            >
               {segment.text}
             </span>
           );
