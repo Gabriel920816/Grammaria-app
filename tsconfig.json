@@ -1,4 +1,3 @@
-
 {
   "compilerOptions": {
     "target": "ESNext",
@@ -6,16 +5,20 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-hyperscript"
+    "jsx": "react-jsx",
+    "paths": {
+      "*": ["./*"]
+    }
   },
-  "include": ["index.tsx", "App.tsx", "services/**/*.ts", "components/**/*.tsx", "types.ts"]
+  "include": ["index.tsx", "App.tsx", "services/**/*.ts", "components/**/*.tsx", "types.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
